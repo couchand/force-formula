@@ -78,19 +78,39 @@
     };
 
     TreeBuilder.prototype.visitFunctionCall = function(node) {
-      var param;
-      return {
-        name: "" + node.name + "()",
-        children: (function() {
-          var _i, _len, _ref, _results;
-          _ref = node.parameters;
+      var children, i, param, _i, _ref;
+      if (node.name === 'case') {
+        children = [
+          {
+            name: "on",
+            children: [node.parameters[0].visit(this)]
+          }
+        ];
+        for (i = _i = 1, _ref = node.parameters.length - 2; _i <= _ref; i = _i += 2) {
+          children.push({
+            name: "when",
+            children: [node.parameters[i].visit(this), node.parameters[i + 1].visit(this)]
+          });
+        }
+        children.push({
+          name: "else",
+          children: [node.parameters[node.parameters.length - 1].visit(this)]
+        });
+      } else {
+        children = (function() {
+          var _j, _len, _ref1, _results;
+          _ref1 = node.parameters;
           _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            param = _ref[_i];
+          for (_j = 0, _len = _ref1.length; _j < _len; _j++) {
+            param = _ref1[_j];
             _results.push(param.visit(this));
           }
           return _results;
-        }).call(this)
+        }).call(this);
+      }
+      return {
+        name: "" + node.name + "()",
+        children: children
       };
     };
 
