@@ -62,8 +62,7 @@ dependencies
 ------------
 
 run
- * express (for server only)
- * csv (for tester and server)
+ * csv (for tester)
 
 build
  * coffee
