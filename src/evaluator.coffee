@@ -14,7 +14,7 @@ class Evaluator extends FormulaVisitor
   visitFunctionCall: (node) ->
     vals = (param.visit @ for param in node.parameters)
     func = funcs[node.name]
-    func vals
+    if func? then func vals else @data["#{node.name}()"]
 
 getOperator = (operator) ->
   switch operator
