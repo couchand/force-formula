@@ -12,6 +12,10 @@ getTemplate = (formula_src) ->
   lets.unshift 'message'
   lets.join ','
 
+getUnbound = (formula_src) ->
+  formula = parser.parse formula_src
+  evaluator.unbound formula
+
 test = (formula_src, csv_src, report) ->
   formula = parser.parse formula_src
   results = []
@@ -22,6 +26,11 @@ test = (formula_src, csv_src, report) ->
     report results
   )
 
+testJson = (formula_src, json, report) ->
+  formula = parser.parse formula_src
+  data.actual = evaluator.evaluate formula, data for data in json
+  report json
+
 getFailures = (results) ->
   failures = []
   for data, index in results
@@ -31,6 +40,8 @@ getFailures = (results) ->
 
 module.exports = {
   getTemplate: getTemplate
+  getUnbound: getUnbound
   test: test
+  testJson: testJson
   getFailures: getFailures
 }
