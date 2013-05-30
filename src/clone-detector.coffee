@@ -4,16 +4,21 @@ FormulaVisitor = require './visitor'
 
 class Masser extends FormulaVisitor
   visitLiteral: (node) ->
-    1
+    node.mass = 1
   visitReference: (node) ->
-    1
+    node.mass = 1
+  visitParens: (node) ->
+    return node.mass if node.mass?
+    node.mass = super node
   visitInfixExpression: (node) ->
-    super node, (a, b) -> 1 + a + b
+    return node.mass if node.mass?
+    node.mass = super node, (a, b) -> 1 + a + b
   visitFunctionCall: (node) ->
-    return 1 if node.parameters.length is 0
+    return node.mass if node.mass?
+    return node.mass = 1 if node.parameters.length is 0
     params = (param.visit @ for param in node.parameters)
     mass = (mass or 1) + param_mass for param_mass in params
-    mass
+    node.mass = mass
 
 class Flattener extends FormulaVisitor
   visitLiteral: (node) ->
@@ -25,7 +30,7 @@ class Flattener extends FormulaVisitor
   visitFunctionCall: (node) ->
     nodes = [node]
     for param in node.parameters
-      nodes.push param.visit @
+      nodes = nodes.concat param.visit @
     nodes
 
 class Hasher extends FormulaVisitor
