@@ -1,11 +1,14 @@
 # build parser and examples
 
-all: parser examples server other
+all: parser examples server other tests
 
 parser: dst/parser.js
 examples: dst/printer.js dst/tree.js dst/complexity.js
 server: dst/evaluator.js dst/tester.js
 other: dst/apex.js
+
+tests:
+	mocha --compilers coffee:coffee-script
 
 dst/parser.js: src/formula.jison
 	jison -o ./dst/parser.js ./src/formula.jison
