@@ -90,7 +90,7 @@ class CloneDetector
   bucket: (tree) ->
     subtrees = @flatten tree
     buckets = []
-    for i in subtrees when @mass i > @mass_threshold
+    for i in subtrees when @mass_threshold < @mass i
       hash = @hash i
       (buckets[hash] ||= []).push i
     buckets
