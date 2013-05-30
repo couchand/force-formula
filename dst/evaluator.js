@@ -39,7 +39,11 @@
         return _results;
       }).call(this);
       func = funcs[node.name];
-      return func(vals);
+      if (func != null) {
+        return func(vals);
+      } else {
+        return this.data["" + node.name + "()"];
+      }
     };
 
     return Evaluator;
