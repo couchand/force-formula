@@ -97,11 +97,15 @@ class CloneDetector
     buckets
 
   match: (buckets) ->
-#    for bucket in buckets
-#      for i in bucket
-#        for j in bucket when i isnt j
+    for bucket in buckets
+      for i, left of bucket
+        for j in [++i...bucket.length]
+          right = bucket[j]
+          console.error 'left: ', left
+          console.error 'right: ', right
 #          if @similarity_threshold < @compare i, j
 #            @add_pair i, j
+    []
 
 module.exports = CloneDetector
 #module.exports = ( formula, st, mt ) ->
