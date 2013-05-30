@@ -83,9 +83,10 @@ class CloneDetector
     tree.visit @hasher
 
   detectClones: (tree) ->
-    @mass tree
+    @mass tree #memoize
+    @hash tree #memoize
     buckets = @bucket tree
-    match buckets
+    @match buckets
 
   bucket: (tree) ->
     subtrees = @flatten tree
