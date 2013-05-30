@@ -1,5 +1,12 @@
 # build parser and examples
 
+all: parser examples server other
+
+parser: dst/parser.js
+examples: dst/printer.js dst/tree.js dst/complexity.js
+server: dst/evaluator.js dst/server.js dst/tester.js dst/visitor.js
+other: dst/apex.js
+
 dst/parser.js: src/formula.jison
 	jison -o ./dst/parser.js ./src/formula.jison
 
@@ -13,6 +20,10 @@ dst/printer.js: dst/parser.js dst/nodes.js src/visitor.coffee src/printer.coffee
 dst/tree.js: dst/parser.js dst/nodes.js src/visitor.coffee src/tree.coffee src/elideRequire.patch
 	coffee -c -o ./dst/ -j tree ./src/visitor.coffee ./src/tree.coffee
 	patch ./dst/tree.js ./src/elideRequire.patch
+
+dst/complexity.js: dst/parser.js dst/nodes.js src/visitor.coffee src/complexity.coffee src/elideRequire.patch
+	coffee -c -o ./dst/ -j complexity ./src/visitor.coffee ./src/complexity.coffee
+	patch ./dst/complexity.js ./src/elideRequire.patch
 
 dst/evaluator.js: src/evaluator.coffee
 	coffee -c -o ./dst/ ./src/evaluator.coffee
@@ -28,9 +39,3 @@ dst/visitor.js: src/visitor.coffee
 
 dst/apex.js: src/apex.coffee
 	coffee -c -o ./dst/ ./src/apex.coffee
-
-parser: dst/parser.js
-examples: dst/printer.js dst/tree.js
-server: dst/evaluator.js dst/server.js dst/tester.js dst/visitor.js
-other: dst/apex.js
-all: parser examples server other
