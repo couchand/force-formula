@@ -83,13 +83,19 @@ class CloneDetector
     tree.visit @hasher
 
   detectClones: (tree) ->
+    @mass tree
+    buckets = @bucket tree
+    match buckets
+
+  bucket: (tree) ->
     subtrees = @flatten tree
     buckets = []
     for i in subtrees when @mass i > @mass_threshold
       hash = @hash i
-      buckets[hash] ||= []
-      buckets[hash].push i
+      (buckets[hash] ||= []).push i
     buckets
+
+  match: (buckets) ->
 #    for bucket in buckets
 #      for i in bucket
 #        for j in bucket when i isnt j
