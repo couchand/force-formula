@@ -44,30 +44,28 @@ class Hasher extends FormulaVisitor
   reduce: (offset, val) ->
     @mod offset * @buckets / 3 + val / @buckets
 
-  visitIntegerLiteral: (node) ->
-    @reduce 0, @mod(node.value)
-  visitDecimalLiteral: (node) ->
-    @reduce 0, @mod(node.value)
-  visitReference: (node) ->
-    @reduce 1, @hash(node.name)
-  visitStringLiteral: (node) ->
-    @reduce 2, @hash(node.value)
+  visitLiteral: (node) -> node.hash = 0
+  visitReference: (node) -> node.hash = 0
   visitInfixExpression: (node) ->
     t = @
+    total_mass = node.left.mass + node.right.mass
+    a_weight = 0.5 * node.left.mass / total_mass
+    b_weight = 0.5 * node.right.mass / total_mass
     super node, (a, b) ->
-      hash = t.hash(node.operator) / 2
-      hash += a / 4
-      hash += b / 4
-      t.mod hash
+      hash = 1 # 2 * 0.5 = airity * airity_weight
+      hash += a * a_weight
+      hash += b * b_weight
+      node.hash = t.mod hash
   visitFunctionCall: (node) ->
-    if node.parameters.length is 0
-      return @mod @hash(node.name) / 2
-    params = (param.visit @ for param in node.parameters)
+    return node.hash = 0 if node.parameters.length is 0
+    airity_weight = 0.5
+    total_mass = (total_mass or 0) + p.mass for p in node.parameters
+    param_weight = 0.5 / total_mass
+    params = (param.mass * param.visit @ for param in node.parameters)
     hash = (hash or 0) + param_hash for param_hash in params
-    hash /= 4 * params.length
-    hash += @hash(node.name) / 2
-    hash += @mod(params.length) / 4
-    @mod hash
+    hash *= param_weight
+    hash += params.length * airity_weight
+    node.hash = @mod hash
 
 class CloneDetector
   constructor: (@similarity_threshold, @mass_threshold) ->
