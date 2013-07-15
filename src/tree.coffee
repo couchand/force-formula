@@ -4,18 +4,29 @@ FormulaVisitor = require './visitor'
 
 class TreeBuilder extends FormulaVisitor
   visitLiteral: (node) ->
-    { name: node.value }
+    val = node.value
+    { name: val, value: val }
   visitStringLiteral: (node) ->
-    { name: "'#{node.value}'" }
+    val = "'#{node.value}'"
+    { name: val, value: val }
   visitReference: (node) ->
-    { name: node.name }
+    val = node.name
+    { name: val, value: val }
   visitParens: (node) ->
-    { name: '(_)', children: [node.formula.visit @] }
+    child = node.formula.visit @
+    val = "( #{child.value} )"
+    { name: '( )', children: [child], value: val }
   visitInfixExpression: (node) ->
     super node, (a, b) ->
-      { name: node.operator, children: [a, b] }
+      op = node.operator
+      { name: op, children: [a, b], value: "#{a.value} #{op} #{b.value}" }
   visitFunctionCall: (node) ->
-    { name: "#{node.name}()", children: (param.visit @ for param in node.parameters) }
+    children = (param.visit @ for param in node.parameters)
+    val = "#{node.name}("
+    unless children.length is 0
+      val += " #{(child.value for child in children).join ', '} "
+    val += ")"
+    { name: "#{node.name}()", children: children, value: val }
 
 module.exports = ( formula ) ->
   formula.visit new TreeBuilder()
