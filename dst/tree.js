@@ -44,53 +44,84 @@
     }
 
     TreeBuilder.prototype.visitLiteral = function(node) {
+      var val;
+      val = node.value;
       return {
-        name: node.value
+        name: val,
+        value: val
       };
     };
 
     TreeBuilder.prototype.visitStringLiteral = function(node) {
+      var val;
+      val = "'" + node.value + "'";
       return {
-        name: "'" + node.value + "'"
+        name: val,
+        value: val
       };
     };
 
     TreeBuilder.prototype.visitReference = function(node) {
+      var val;
+      val = node.name;
       return {
-        name: node.name
+        name: val,
+        value: val
       };
     };
 
     TreeBuilder.prototype.visitParens = function(node) {
+      var child, val;
+      child = node.formula.visit(this);
+      val = "( " + child.value + " )";
       return {
-        name: '(_)',
-        children: [node.formula.visit(this)]
+        name: '( )',
+        children: [child],
+        value: val
       };
     };
 
     TreeBuilder.prototype.visitInfixExpression = function(node) {
       return TreeBuilder.__super__.visitInfixExpression.call(this, node, function(a, b) {
+        var op;
+        op = node.operator;
         return {
-          name: node.operator,
-          children: [a, b]
+          name: op,
+          children: [a, b],
+          value: "" + a.value + " " + op + " " + b.value
         };
       });
     };
 
     TreeBuilder.prototype.visitFunctionCall = function(node) {
-      var param;
-      return {
-        name: "" + node.name + "()",
-        children: (function() {
-          var _i, _len, _ref, _results;
-          _ref = node.parameters;
+      var child, children, param, val;
+      children = (function() {
+        var _i, _len, _ref, _results;
+        _ref = node.parameters;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          param = _ref[_i];
+          _results.push(param.visit(this));
+        }
+        return _results;
+      }).call(this);
+      val = "" + node.name + "(";
+      if (children.length !== 0) {
+        val += " " + (((function() {
+          var _i, _len, _results;
           _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            param = _ref[_i];
-            _results.push(param.visit(this));
+          for (_i = 0, _len = children.length; _i < _len; _i++) {
+            child = children[_i];
+            _results.push(child.value);
           }
           return _results;
-        }).call(this)
+        })()).join(', ')) + " ";
+      }
+      val += ")";
+      return {
+        name: "" + node.name + "()",
+        children: children,
+        value: val
       };
     };
 
